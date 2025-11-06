@@ -2,7 +2,7 @@ package com.doodlejump.doodlejump;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-
+//gluh
 public class HelloController {
     @FXML
     private Label welcomeText;
