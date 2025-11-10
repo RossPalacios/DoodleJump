@@ -14,8 +14,9 @@ public class App extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-        root.getChildren().add(platform);
-        //-----------------------------
+        Game game = new Game(primaryStage);
+        game.startGame();
+
     }
 
     public class Launcher {
