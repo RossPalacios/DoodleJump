@@ -3,6 +3,7 @@ package com.doodlejump.doodlejump;
 import javafx.animation.AnimationTimer;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -37,7 +38,7 @@ public class Game {
         this.root.getChildren().add(testPlatform);
 
         //handler will deal with collision and movement
-        MovementHandler handler = new MovementHandler(scene, this.player);
+        MovementHandler handler = new MovementHandler(scene, this.player, this.testPlatform);
         handler.update();
     }
 }

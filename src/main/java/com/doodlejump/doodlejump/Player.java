@@ -3,6 +3,7 @@ package com.doodlejump.doodlejump;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
 
 public class Player extends ImageView {
 
@@ -17,7 +18,7 @@ public class Player extends ImageView {
         this.setFitWidth(PLAYER_WIDTH_HEIGHT);
         this.setFitHeight(PLAYER_WIDTH_HEIGHT);
         this.setX(50);
-        this.setY(50);
+        this.setY(200);
     }
 
     public double getSpeed() {

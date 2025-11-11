@@ -1,8 +1,6 @@
 package com.doodlejump.doodlejump;
 
 import javafx.animation.AnimationTimer;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 
 import java.util.ArrayList;
@@ -11,11 +9,17 @@ public class MovementHandler {
 
     private Player player;
     private Scene scene;
-    private ArrayList<String> input;
+    private Platform platform;
 
-    public MovementHandler(Scene scene, Player player) {
+    private ArrayList<String> input;
+    private double velocity;
+    private final double gravity = .35;
+
+    public MovementHandler(Scene scene, Player player, Platform platform) {
         this.player = player;
         this.scene = scene;
+        this.velocity = 0;
+        this.platform = platform;
         //create input to use in the movement updating
         input = new ArrayList<>();
         scene.setOnKeyPressed(e -> {
@@ -27,6 +31,7 @@ public class MovementHandler {
             String code = e.getCode().toString();
             input.remove(code);
         });
+
     }
 
     public void update() {
@@ -35,6 +40,7 @@ public class MovementHandler {
             public void handle(long now) {
                 updateMovement();
                 checkBorders();
+                checkPlatformCollision();
             }
         };
         timer.start();
@@ -47,20 +53,34 @@ public class MovementHandler {
         if (input.contains("RIGHT")) {
             player.setX(player.getX() + player.getSpeed());
         }
+        //he must jump when colliding
+        velocity += gravity;
+        player.setY(player.getY() + velocity);
     }
 
     private void checkBorders() {
+        //remove later, just usefeul for testing
         if (player.getY() + player.getFitHeight() > this.scene.getHeight()) {
             player.setY(this.scene.getHeight() - player.getFitHeight());
-            //velocityY = 0;
+            velocity = -15;
             //canJump = true;
         }
-        if(player.getX() - player.getFitWidth() > this.scene.getWidth()) {
+        if (player.getX() - player.getFitWidth() > this.scene.getWidth()) {
             player.setX(0);
         }
-        if(player.getX() + player.getFitWidth() < 0) {
+        if (player.getX() + player.getFitWidth() < 0) {
             player.setX(this.scene.getWidth() - player.getFitWidth());
         }
+    }
+
+    private void checkPlatformCollision() {
+        if (player.getBoundsInParent().intersects(platform.getBoundsInParent())) {
+            if (velocity > 0 && player.getY() + player.getFitHeight() - velocity <= platform.getY()) {
+                player.setY(platform.getY() - player.getFitHeight());
+                velocity = 0;
+            }
+        }
+
     }
 }
 
