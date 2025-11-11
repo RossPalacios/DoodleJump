@@ -14,6 +14,6 @@ public class Platform extends ImageView{
         this.setFitHeight(PLATFORM_HEIGHT);
         this.setFitWidth(PLATFORM_WIDTH);
         this.setX(50);
-        this.setY(400);
+        this.setY(500);
     }
 }

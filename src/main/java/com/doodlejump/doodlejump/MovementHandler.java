@@ -18,6 +18,7 @@ public class MovementHandler {
     private final double GRAVITY = 100;
     //I tweaked constants just to make them feel smoother.
     private final double DURATION = .05;
+    private final double REBOUND_VELOCITY = -(GRAVITY * 2); // gravity * 2 felt the smoothest.
 
     public MovementHandler(Scene scene, Player player, Platform platform) {
         this.player = player;
@@ -67,7 +68,7 @@ public class MovementHandler {
         //remove later, just usefeul for testing
         if (player.getY() + player.getFitHeight() > this.scene.getHeight()) {
             player.setY(this.scene.getHeight() - player.getFitHeight());
-            velocity = -(GRAVITY * 2); // gravity * 2 felt the smoothest.
+            velocity = REBOUND_VELOCITY;
         }
         if (player.getX() - player.getFitWidth() > this.scene.getWidth()) {
             player.setX(0);
@@ -81,7 +82,7 @@ public class MovementHandler {
         if (player.getBoundsInParent().intersects(platform.getBoundsInParent())) {
             if (velocity > 0 && player.getY() + player.getFitHeight() - velocity <= platform.getY()) {
                 player.setY(platform.getY() - player.getFitHeight());
-                velocity = 0;
+                velocity = REBOUND_VELOCITY;
             }
         }
 
