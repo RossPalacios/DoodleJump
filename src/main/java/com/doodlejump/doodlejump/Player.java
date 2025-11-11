@@ -27,4 +27,13 @@ public class Player extends ImageView {
     public void setSpeed(double speed) {
         this.speed = speed;
     }
+
+    public void setImage(String image){
+        if(image.equals("left")){
+            this.setImage(new Image(getClass().getResource("/Images/leftDood.png").toExternalForm()));
+        }
+        if(image.equals("right")){
+            this.setImage(new Image(getClass().getResource("/Images/rightDood.png").toExternalForm()));
+        }
+    }
 }
