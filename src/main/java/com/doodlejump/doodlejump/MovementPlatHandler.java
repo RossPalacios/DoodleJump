@@ -88,10 +88,18 @@ public class MovementPlatHandler {
 
     private void checkPlatformCollision() {
 
+
+        double playerBottom = (player.getLayoutY() + player.getFitHeight()); // adding the top y with the height actually gets bottom
+        double playerTop = player.getLayoutY(); // this just gives the top y
+
+
         for (Platform platform : platforms) {
+            double platformBottom = (platform.getLayoutY() + platform.getFitHeight()); // same as earlier but in the loop
+            double platformTop = (platform.getLayoutY()); // same as earlier
+
             if (isColliding(platform, player)) {
-                if (velocity > 0 && player.getY() + player.getFitHeight() - velocity <= platform.getY()) {
-                    player.setY(platform.getY() - player.getFitHeight());
+                if (velocity > 0 && playerBottom >= platformTop && playerTop > platformTop) {
+                    player.setLayoutY(platformTop - player.getFitHeight());
                     velocity = REBOUND_VELOCITY;
                 }
             }
