@@ -72,7 +72,6 @@ public class MovementPlatHandler {
         velocity += GRAVITY * DURATION;
         player.setY(player.getY() + velocity * DURATION);
     }
-
     private void checkBorders() {
         // wrap horizontally
         if (player.getX() > this.scene.getWidth()) player.setX(0);
@@ -88,82 +87,96 @@ public class MovementPlatHandler {
 
     private void checkPlatformCollision() {
 
+        double currentPlayerBottom = (player.getY() + player.getFitHeight()); // adding the top y with the height actually gets bottom
+        double currentY = player.getY(); // this just gives the top y
+        double nextY = currentY + (velocity * DURATION);
+        double nextPlayerBottom = (nextY + player.getFitHeight());
 
-        double playerBottom = (player.getLayoutY() + player.getFitHeight()); // adding the top y with the height actually gets bottom
-        double playerTop = player.getLayoutY(); // this just gives the top y
 
+        double playerLeft = player.getX();
+        double playerRight = playerLeft + player.getFitWidth();
 
         for (Platform platform : platforms) {
-            double platformBottom = (platform.getLayoutY() + platform.getFitHeight()); // same as earlier but in the loop
-            double platformTop = (platform.getLayoutY()); // same as earlier
+            double platformTop = platform.getY();
+            double platformLeft = platform.getX();
+            double platformRight = platformLeft + platform.getFitWidth();
 
-            if (isColliding(platform, player)) {
-                if (velocity > 0 && playerBottom >= platformTop && playerTop > platformTop) {
-                    player.setLayoutY(platformTop - player.getFitHeight());
+            // horizontal overlap
+            boolean horizontalOverlap = playerRight > platformLeft && playerLeft < platformRight;
+
+
+            boolean verticalCollision = player.getY() + player.getFitHeight() <= platformTop &&
+                    nextPlayerBottom >= platformTop;
+
+            //if (velocity > 0 && verticalCollision && horizontalOverlap) {
+                if (isColliding(platform, player)) {
+                    player.setY(platform.getY() - player.getFitHeight());
                     velocity = REBOUND_VELOCITY;
+                    System.out.println("working");
                 }
-            }
+            //}
         }
     }
-
-    private boolean isColliding(ImageView imgOne, ImageView imgTwo) {
+    private boolean isColliding(ImageView platform, ImageView player) {
 
 
         // create pixel reader to check collision
-        PixelReader pixelReaderOne = imgOne.getImage().getPixelReader();
-        PixelReader pixelReaderTwo = imgTwo.getImage().getPixelReader();
+        PixelReader platformRead = platform.getImage().getPixelReader();
+        PixelReader playerRead = player.getImage().getPixelReader();
 
         // if there is no pixels then there's nothing to check.
-        if (pixelReaderOne == null || pixelReaderTwo == null) {
-            return false;
-        }
+        if (platformRead == null || playerRead == null) return false;
+
 
         // calculating regions which overlap
-        Bounds boundOne = imgOne.getBoundsInParent();
-        Bounds boundTwo = imgTwo.getBoundsInParent();
+        Bounds boundPlay = player.getBoundsInParent();
+        Bounds boundPlat = platform.getBoundsInParent();
 
         // much faster check.
-        if (!boundOne.intersects(boundTwo)) return false;
+        if (!boundPlat.intersects(boundPlay)) return false;
 
-
-        int startX = (int) Math.max(boundOne.getMinX(), boundTwo.getMinX()); // leftmost x
-        int startY = (int) Math.max(boundOne.getMinY(), boundTwo.getMinY()); // lowest y
-        int endX = (int) Math.min(boundOne.getMaxX(), boundTwo.getMaxX()); // higher x
-        int endY = (int) Math.min(boundOne.getMaxY(), boundTwo.getMaxY()); // higher y
-        //--------------
 
         // really annoying but scaling is needed due to using getFitWidth/height
-        double scaleXOne = imgOne.getImage().getWidth() / imgOne.getFitWidth();
-        double scaleYOne = imgOne.getImage().getHeight() / imgOne.getFitHeight();
-        double scaleXTwo = imgTwo.getImage().getWidth() / imgTwo.getFitWidth();
-        double scaleYTwo = imgTwo.getImage().getHeight() / imgTwo.getFitHeight();
+        double scaleXPlat = platform.getImage().getWidth() / platform.getFitWidth();
+        double scaleYPlat = platform.getImage().getHeight() / platform.getFitHeight();
+        double scaleXPlay = player.getImage().getWidth() / player.getFitWidth();
+        double scaleYPlay = player.getImage().getHeight() / player.getFitHeight();
+
+        int playerBottomY = (int)((boundPlay.getMaxY() - boundPlay.getMinY() - 1) * scaleYPlay);
+
+        int startX = (int) Math.max(boundPlay.getMinX(), boundPlat.getMinX()); // leftmost x
+        int endX = (int) Math.min(boundPlay.getMaxX(), boundPlat.getMaxX()); // higher x
+        //--------------
 
         //Looping through all pixels, very obnoxious
-        for (int y = startY; y < endY; y++) {
-            for (int x = startX; x < endX; x++) {
+        for (int x = startX; x < endX; x++) {
 
-                int x1 = (int) ((x - boundOne.getMinX()) * scaleXOne);
-                int y1 = (int) ((y - boundOne.getMinY()) * scaleYOne);
-                int x2 = (int) ((x - boundTwo.getMinX()) * scaleXTwo);
-                int y2 = (int) ((x - boundTwo.getMinX()) * scaleYTwo);
+            int platX = (int) ((x - boundPlat.getMinX()) * scaleXPlat);
+            //int platY = (int) ((boundPlay.getMaxY() - boundPlat.getMinY() - 1) * scaleYPlat);
+            int playX = (int) ((x - boundPlay.getMinX()) * scaleXPlay);
+            //int playY = playerBottomY;
 
-                // make sure values are correctly in bounds.
-                if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0)
-                    continue;
 
-                //get pixel at the correct coordinates
-                int pixIntOne = pixelReaderOne.getArgb(x1, y1);
-                int pixIntTwo = pixelReaderTwo.getArgb(x2, y2);
 
-                //this gets alpha channels, whatever those are, I did have to look this up
-                // since I have never made pixel perfect collision before in javaFX.
-                int alphaOne = pixIntOne >> 24 & 0xFF;
-                int alphaTwo = pixIntTwo >> 24 & 0xFF;
+            //get pixel at the correct coordinates
+            int pixIntPlat = platformRead.getArgb(platX, 0);
+            int pixIntPlay = playerRead.getArgb(playX, playerBottomY);
 
-                //if they aren't transparent then they are colliding
-                if (alphaOne > 0 && alphaTwo > 0) {
-                    return true;
-                }
+            // make sure values are correctly in bounds for player and platform.
+            if (platX < 0 || platX >= platform.getImage().getWidth())
+                continue;
+            if (playX < 0 || playX >= player.getImage().getWidth())
+                continue;
+
+            //this gets alpha channels, whatever those are, I did have to look this up
+            // since I have never made pixel perfect collision before in javaFX.
+            int alphaPlat = (pixIntPlat >> 24) & 0xFF;
+            int alphaPlay = (pixIntPlay >> 24) & 0xFF;
+
+            //if they aren't transparent then they are colliding
+            if (alphaPlay > 0 && alphaPlat > 0) {
+                System.out.println("collision working");
+                return true;
             }
         }//end of for loops
         return false;
