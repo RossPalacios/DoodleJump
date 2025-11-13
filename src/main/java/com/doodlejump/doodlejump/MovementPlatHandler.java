@@ -8,7 +8,7 @@ import javafx.util.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MovementHandler {
+public class MovementPlatHandler {
 
     private Player player;
     private Scene scene;
@@ -20,7 +20,7 @@ public class MovementHandler {
     private final double DURATION = 0.05;
     private final double REBOUND_VELOCITY = -(GRAVITY * 2);
 
-    public MovementHandler(Scene scene, Player player, List<Platform> platforms) {
+    public MovementPlatHandler(Scene scene, Player player, List<Platform> platforms) {
         this.player = player;
         this.scene = scene;
         this.velocity = 0;
@@ -74,7 +74,8 @@ public class MovementHandler {
         if (player.getX() > this.scene.getWidth()) player.setX(0);
         if (player.getX() + player.getFitWidth() < 0) player.setX(this.scene.getWidth() - player.getFitWidth());
 
-        // bottom boundary
+        // bottom boundary, will remove once platforms are 100% implemented since doodle
+        // shouldn't be allowed to go past the bottom.
         if (player.getY() + player.getFitHeight() > this.scene.getHeight()) {
             player.setY(this.scene.getHeight() - player.getFitHeight());
             velocity = REBOUND_VELOCITY;

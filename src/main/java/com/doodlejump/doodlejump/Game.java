@@ -1,3 +1,11 @@
+//Ross Palacios, Adrianna Barcena, Alan Moore, Ashlyn Kasper
+//11/13/2025
+//CSCI 3331, Garcia
+//
+//Game class for doodle jump
+//
+//
+//Run the games different classes together to make doodlejump.
 package com.doodlejump.doodlejump;
 
 import javafx.scene.Scene;
@@ -21,14 +29,7 @@ public class Game {
         this.player = new Player(playerSpeedTemp);
 
         // create multiple platforms
-        platforms = new ArrayList<>();
-        int numberOfPlatforms = 10;
-        for (int i = 0; i < numberOfPlatforms; i++) {
-            Platform p = new Platform();
-            p.setX(Math.random() * (400 - p.getFitWidth())); // random X for the placement of the platform
-            p.setY(600 - i * 60); // spread platforms vertically
-            platforms.add(p);
-        }
+        this.platforms = new ArrayList<>();
     }
 
     public void startGame() {
@@ -41,13 +42,26 @@ public class Game {
         // add player
         root.getChildren().add(player);
 
+
+        runPlatforms();
         // add all platforms
         for (Platform p : platforms) {
             root.getChildren().add(p);
         }
 
         // create handler for movement, collisions, and scrolling
-        MovementHandler handler = new MovementHandler(scene, player, platforms);
+        MovementPlatHandler handler = new MovementPlatHandler(scene, player, platforms);
         handler.update();
+
+    }
+
+    public void runPlatforms() {
+        int numberOfPlatforms = 10;
+        for (int i = 0; i < numberOfPlatforms; i++) {
+            Platform p = new Platform();
+            p.setX(Math.random() * (400 - p.getFitWidth())); // random X for the placement of the platform
+            p.setY(600 - i * 60); // spread platforms vertically
+            platforms.add(p);
+        }
     }
 }
