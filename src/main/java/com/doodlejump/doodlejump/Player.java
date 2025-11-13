@@ -6,7 +6,7 @@ import javafx.scene.image.ImageView;
 
 public class Player extends ImageView {
 
-    private double speed;
+    private double speed, previousY;
 
     public Player(double speed) {
         int PLAYER_WIDTH_HEIGHT = 100;
@@ -25,6 +25,12 @@ public class Player extends ImageView {
     }
     public void setSpeed(double speed) {
         this.speed = speed;
+    }
+    public double getPreviousY() {
+        return this.previousY;
+    }
+    public void setPreviousY(double previousY) {
+        this.previousY = previousY;
     }
 
     public void setImage(String image){
