@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.geometry.Bounds;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelReader;
 import javafx.util.Duration;
@@ -14,11 +15,14 @@ import java.util.List;
 public class MovementPlatHandler {
 
     private Player player;
+    private Game game; // needed this to actually end the game.
     private Scene scene;
     private List<Platform> platforms;  // multiple platforms
+    private Timeline gLoop;
 
     private ArrayList<String> input;
     private double velocity;
+    private boolean gameOver;
     //constants which have been tweaked to feel smooth
     private final double GRAVITY = 100;
     private final double DURATION = 0.05;
@@ -31,17 +35,20 @@ public class MovementPlatHandler {
      * @param player    the player object
      * @param platforms the platforms the list of all platforms
      */
-    public MovementPlatHandler(Scene scene, Player player, List<Platform> platforms) {
+    public MovementPlatHandler(Scene scene, Player player, List<Platform> platforms, Game game) {
         this.player = player;
+        this.game = game;
         this.scene = scene;
         this.velocity = 0;
         this.platforms = platforms;
+
+        this.gameOver = false;
         input = new ArrayList<>();
 
         // handle key press/release
         scene.setOnKeyPressed(e -> {
             String code = e.getCode().toString();
-            if (!input.contains(code)) input.add(code);
+            if (!input.contains(code) && !gameOver) input.add(code);
         });
 
         scene.setOnKeyReleased(e -> {
@@ -61,7 +68,7 @@ public class MovementPlatHandler {
             scrollPlatforms(); // infinite scrolling
         });
 
-        Timeline gLoop = new Timeline(loopKeyFrame);
+        gLoop = new Timeline(loopKeyFrame);
         gLoop.setCycleCount(Timeline.INDEFINITE);
         gLoop.play();
     }
@@ -73,11 +80,11 @@ public class MovementPlatHandler {
         double prevY = player.getY();
 
         // move left/right
-        if (input.contains("LEFT")) {
+        if (input.contains("LEFT") && !gameOver) {
             player.setX(player.getX() - player.getSpeed());
             player.setImage("left");
         }
-        if (input.contains("RIGHT")) {
+        if (input.contains("RIGHT") && !gameOver) {
             player.setX(player.getX() + player.getSpeed());
             player.setImage("right");
         }
@@ -96,14 +103,14 @@ public class MovementPlatHandler {
     private void checkBorders() {
 
         // wrap horizontally
-        if (player.getX() > this.scene.getWidth()) player.setX(0);
+        if (player.getX() > this.scene.getWidth() && !gameOver) player.setX(0);
         if (player.getX() + player.getFitWidth() < 0) player.setX(this.scene.getWidth() - player.getFitWidth());
 
         // bottom boundary, will remove once platforms are 100% implemented since doodle
         // shouldn't be allowed to go past the bottom.
         if (player.getY() + player.getFitHeight() > this.scene.getHeight()) {
-            player.setY(this.scene.getHeight() - player.getFitHeight());
-            velocity = REBOUND_VELOCITY;
+            gLoop.stop();
+            game.endGame();
         }
     }
 
@@ -113,7 +120,7 @@ public class MovementPlatHandler {
     private void checkPlatformCollision() {
         for (Platform platform : platforms) {
             // if the player is falling and is above the platform, rebound/bounce
-            if (velocity > 0 && player.getPreviousY() + player.getFitHeight() <= platform.getY()) {
+            if (velocity > 0 && player.getPreviousY() + player.getFitHeight() <= platform.getY() && !gameOver) {
                 if (isColliding(platform, player)) {
                     player.setY(platform.getY() - player.getFitHeight());
                     velocity = REBOUND_VELOCITY;

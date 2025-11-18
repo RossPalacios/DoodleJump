@@ -9,6 +9,8 @@
 package com.doodlejump.doodlejump;
 
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
@@ -19,7 +21,8 @@ public class Game {
     private Stage primaryStage;
     private Pane root;
     private Player player;
-    private List<Platform> platforms; // multiple platforms instead of the just test ones
+    private ImageView backGround;
+    private List<Platform> platforms; // multiple platforms instead of just the test ones
 
     public Game(Stage primaryStage) {
         double playerSpeedTemp = 5;
@@ -27,6 +30,8 @@ public class Game {
         this.primaryStage = primaryStage;
         this.root = new Pane();
         this.player = new Player(playerSpeedTemp);
+        Image bckImage = new Image(getClass().getResource("/Images/background.png").toExternalForm());
+        this.backGround = new ImageView(bckImage);
 
         // create multiple platforms
         this.platforms = new ArrayList<>();
@@ -39,9 +44,9 @@ public class Game {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        // add player
-        root.getChildren().add(player);
+        root.getChildren().add(backGround); // adding background before player so it's behind
 
+        root.getChildren().add(player); // add player
 
         runPlatforms();
         // add all platforms
@@ -50,7 +55,7 @@ public class Game {
         }
 
         // create handler for movement, collisions, and scrolling
-        MovementPlatHandler handler = new MovementPlatHandler(scene, player, platforms);
+        MovementPlatHandler handler = new MovementPlatHandler(scene, player, platforms, this);
         handler.update();
 
     }
@@ -64,4 +69,27 @@ public class Game {
             platforms.add(p);
         }
     }
+
+    private void deletePlatforms(){
+        for (Platform p : platforms) {
+            this.root.getChildren().remove(p);
+        }
+    }
+
+    public void endGame() {
+
+        //initializing bottombreaking of screen.
+        ImageView bottomCrease =  new ImageView(new Image(getClass().getResource("/Images/gameoverbottom.png").toExternalForm()));
+        ImageView gameOverTitle = new ImageView( new Image(getClass().getResource("/Images/gameover.png").toExternalForm()));
+        bottomCrease.setFitWidth(450);
+        bottomCrease.setFitHeight(200);
+        bottomCrease.setY(550);
+        bottomCrease.setX(-10);
+        this.root.getChildren().add(gameOverTitle);
+        this.root.getChildren().add(bottomCrease);
+
+        deletePlatforms();
+    }
 }
+
+
