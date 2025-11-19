@@ -26,6 +26,11 @@ public class Game {
     private ImageView backGround;
     private List<Platform> platforms; // multiple platforms instead of just the test ones
 
+    /**
+     * Create the game given a stage
+     *
+     * @param primaryStage the primary stage
+     */
     public Game(Stage primaryStage) {
         double playerSpeedTemp = 5;
 
@@ -39,6 +44,9 @@ public class Game {
         this.platforms = new ArrayList<>();
     }
 
+    /**
+     * Start the game and it's game loop.
+     */
     public void startGame() {
         Scene scene = new Scene(root, 400, 700);
 
@@ -62,6 +70,9 @@ public class Game {
 
     }
 
+    /**
+     * get the platforms created with a loop.
+     */
     public void runPlatforms() {
         int numberOfPlatforms = 10;
         for (int i = 0; i < numberOfPlatforms; i++) {
@@ -72,12 +83,18 @@ public class Game {
         }
     }
 
+    /**
+     * delete all platforms
+     */
     private void deletePlatforms(){
         for (Platform p : platforms) {
             this.root.getChildren().remove(p);
         }
     }
 
+    /**
+     * End the game and make a game over screen with a quit button.
+     */
     public void endGame() {
 
         //initializing bottom breaking of screen.
