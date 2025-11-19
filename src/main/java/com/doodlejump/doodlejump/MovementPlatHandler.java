@@ -15,26 +15,40 @@ import java.util.List;
 public class MovementPlatHandler {
 
     private Player player;
+    private Game game; // needed this to actually end the game.
     private Scene scene;
     private List<Platform> platforms;  // multiple platforms
+    private Timeline gLoop;
 
     private ArrayList<String> input;
     private double velocity;
+    private boolean gameOver;
+    //constants which have been tweaked to feel smooth
     private final double GRAVITY = 100;
     private final double DURATION = 0.05;
     private final double REBOUND_VELOCITY = -(GRAVITY * 2);
 
-    public MovementPlatHandler(Scene scene, Player player, List<Platform> platforms) {
+    /**
+     * Instantiates a new Movement plat handler.
+     *
+     * @param scene     the scene for key usage
+     * @param player    the player object
+     * @param platforms the platforms the list of all platforms
+     */
+    public MovementPlatHandler(Scene scene, Player player, List<Platform> platforms, Game game) {
         this.player = player;
+        this.game = game;
         this.scene = scene;
         this.velocity = 0;
         this.platforms = platforms;
+
+        this.gameOver = false;
         input = new ArrayList<>();
 
         // handle key press/release
         scene.setOnKeyPressed(e -> {
             String code = e.getCode().toString();
-            if (!input.contains(code)) input.add(code);
+            if (!input.contains(code) && !gameOver) input.add(code);
         });
 
         scene.setOnKeyReleased(e -> {
@@ -43,7 +57,9 @@ public class MovementPlatHandler {
         });
     }
 
-    // start the game loop
+    /**
+     * Update the game using a timeline.
+     */
     public void update() {
         KeyFrame loopKeyFrame = new KeyFrame(Duration.millis(16), e -> {
             updateMovement();
@@ -52,20 +68,23 @@ public class MovementPlatHandler {
             scrollPlatforms(); // infinite scrolling
         });
 
-        Timeline gLoop = new Timeline(loopKeyFrame);
+        gLoop = new Timeline(loopKeyFrame);
         gLoop.setCycleCount(Timeline.INDEFINITE);
         gLoop.play();
     }
 
+    /**
+     * update movement using arrow keys and apply physics to the player.
+     */
     private void updateMovement() {
         double prevY = player.getY();
 
         // move left/right
-        if (input.contains("LEFT")) {
+        if (input.contains("LEFT") && !gameOver) {
             player.setX(player.getX() - player.getSpeed());
             player.setImage("left");
         }
-        if (input.contains("RIGHT")) {
+        if (input.contains("RIGHT") && !gameOver) {
             player.setX(player.getX() + player.getSpeed());
             player.setImage("right");
         }
@@ -78,23 +97,30 @@ public class MovementPlatHandler {
 
     }
 
+    /**
+     * Let the player go between screen borders.
+     */
     private void checkBorders() {
 
         // wrap horizontally
-        if (player.getX() > this.scene.getWidth()) player.setX(0);
+        if (player.getX() > this.scene.getWidth() && !gameOver) player.setX(0);
         if (player.getX() + player.getFitWidth() < 0) player.setX(this.scene.getWidth() - player.getFitWidth());
 
         // bottom boundary, will remove once platforms are 100% implemented since doodle
         // shouldn't be allowed to go past the bottom.
         if (player.getY() + player.getFitHeight() > this.scene.getHeight()) {
-            player.setY(this.scene.getHeight() - player.getFitHeight());
-            velocity = REBOUND_VELOCITY;
+            gLoop.stop();
+            game.endGame();
         }
     }
 
+    /**
+     * check if the player is hitting a platform and should bounce.
+     */
     private void checkPlatformCollision() {
         for (Platform platform : platforms) {
-            if (velocity > 0 && player.getPreviousY() + player.getFitHeight() <= platform.getY()) {
+            // if the player is falling and is above the platform, rebound/bounce
+            if (velocity > 0 && player.getPreviousY() + player.getFitHeight() <= platform.getY() && !gameOver) {
                 if (isColliding(platform, player)) {
                     player.setY(platform.getY() - player.getFitHeight());
                     velocity = REBOUND_VELOCITY;
@@ -103,12 +129,19 @@ public class MovementPlatHandler {
         }
     }
 
-    private boolean isColliding(ImageView imgOne, ImageView imgTwo) {
+    /**
+     * Check if the player is colliding, should be pixel perfect.
+     *
+     * @param platform the platform
+     * @param player   the player
+     * @return true if they are colliding perfectly
+     */
+    private boolean isColliding(ImageView platform, ImageView player) {
 
 
         // create pixel reader to check collision
-        PixelReader pixelReaderOne = imgOne.getImage().getPixelReader();
-        PixelReader pixelReaderTwo = imgTwo.getImage().getPixelReader();
+        PixelReader pixelReaderOne = platform.getImage().getPixelReader();
+        PixelReader pixelReaderTwo = player.getImage().getPixelReader();
 
         // if there is no pixels then there's nothing to check.
         if (pixelReaderOne == null || pixelReaderTwo == null) {
@@ -116,8 +149,8 @@ public class MovementPlatHandler {
         }
 
         // calculating regions which overlap
-        Bounds boundOne = imgOne.getBoundsInParent();
-        Bounds boundTwo = imgTwo.getBoundsInParent();
+        Bounds boundOne = platform.getBoundsInParent();
+        Bounds boundTwo = player.getBoundsInParent();
 
         // much faster check, in case they don't intersect at all.
         if (!boundOne.intersects(boundTwo)) return false;
@@ -130,10 +163,11 @@ public class MovementPlatHandler {
         //--------------
 
         // really annoying but scaling is needed due to using getFitWidth/height
-        double scaleXOne = imgOne.getImage().getWidth() / imgOne.getFitWidth();
-        double scaleYOne = imgOne.getImage().getHeight() / imgOne.getFitHeight();
-        double scaleXTwo = imgTwo.getImage().getWidth() / imgTwo.getFitWidth();
-        double scaleYTwo = imgTwo.getImage().getHeight() / imgTwo.getFitHeight();
+        double scaleXOne = platform.getImage().getWidth() / platform.getFitWidth();
+        double scaleYOne = platform.getImage().getHeight() / platform.getFitHeight();
+
+        double scaleXTwo = player.getImage().getWidth() / player.getFitWidth();
+        double scaleYTwo = player.getImage().getHeight() / player.getFitHeight();
 
         //Looping through all pixels, very obnoxious
         for (int y = startY; y < endY; y++) {
@@ -145,8 +179,8 @@ public class MovementPlatHandler {
                 int y2 = (int) ((x - boundTwo.getMinX()) * scaleYTwo);
 
                 // make sure values are correctly in bounds.
-                if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0 || x1 >= imgOne.getImage().getWidth() || y1 >= imgOne.getImage().getHeight() ||
-                        x2 >= imgTwo.getImage().getWidth() || y2 >= imgTwo.getImage().getHeight())
+                if (x1 < 0 || y1 < 0 || x2 < 0 || y2 < 0 || x1 >= platform.getImage().getWidth() || y1 >= platform.getImage().getHeight() ||
+                        x2 >= player.getImage().getWidth() || y2 >= player.getImage().getHeight())
                     continue;
 
                 //get pixel at the correct coordinates
@@ -167,7 +201,9 @@ public class MovementPlatHandler {
         return false;
     }
 
-    // simple infinite scrolling
+    /**
+     * simple infinite scrolling
+     */
     private void scrollPlatforms() {
         double threshold = 300; // Y coordinate above which player triggers scrolling
         if (player.getY() < threshold) {
