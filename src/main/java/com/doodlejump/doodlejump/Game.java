@@ -8,7 +8,9 @@
 //Run the games different classes together to make doodlejump.
 package com.doodlejump.doodlejump;
 
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.Pane;
@@ -78,15 +80,31 @@ public class Game {
 
     public void endGame() {
 
-        //initializing bottombreaking of screen.
+        //initializing bottom breaking of screen.
         ImageView bottomCrease =  new ImageView(new Image(getClass().getResource("/Images/gameoverbottom.png").toExternalForm()));
         ImageView gameOverTitle = new ImageView( new Image(getClass().getResource("/Images/gameover.png").toExternalForm()));
+        ImageView quit = new ImageView( new Image(getClass().getResource("/Images/done.png").toExternalForm()));
+        //just manually set the position for the crinkling
         bottomCrease.setFitWidth(450);
         bottomCrease.setFitHeight(200);
         bottomCrease.setY(550);
         bottomCrease.setX(-10);
+        //------------------------------
+
+        // Initialization of quit button
+        Button quitBtn = new Button();
+        quitBtn.setGraphic(quit);
+        quitBtn.setStyle("-fx-background-color: transparent;");
+        quitBtn.setLayoutX(75);
+        quitBtn.setLayoutY((this.root.getHeight() + quit.getFitHeight()) / 2);
+        quitBtn.setOnAction(e -> {
+            primaryStage.close();
+        });
+        //---------------------------------
+
         this.root.getChildren().add(gameOverTitle);
         this.root.getChildren().add(bottomCrease);
+        this.root.getChildren().add(quitBtn);
 
         deletePlatforms();
     }
