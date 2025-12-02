@@ -28,6 +28,7 @@ public class Game {
     private ImageView backGround;
     private List<Platform> platforms; // multiple platforms instead of just the test ones
     private Button quitBtn;
+    private Platform firstPlat;
     private int score;
 
     /**
@@ -47,6 +48,9 @@ public class Game {
 
         // create multiple platforms
         this.platforms = new ArrayList<>();
+
+        this.firstPlat = new Platform(150,400);
+        this.platforms.add(this.firstPlat);
 
         initializeQuitButton(100, 50);
     }
@@ -73,7 +77,9 @@ public class Game {
 
         root.getChildren().add(player); // add player
 
-        initializePlatforms();
+        root.getChildren().add(firstPlat);
+
+        generatePlatforms();
 
 
         // create handler for movement, collisions, and scrolling
@@ -82,6 +88,10 @@ public class Game {
 
         root.getChildren().add(quitBtn); // add the quit button
         root.requestFocus(); // make sure keys still work
+
+    }
+
+    private void initializeFirstPlatform(){
 
     }
 
@@ -101,6 +111,29 @@ public class Game {
 
             platforms.add(p);
             root.getChildren().add(p);
+        }
+    }
+
+    private void generatePlatforms(){
+        Platform topPlat = this.firstPlat;
+        int xOffset = 150;
+        int yOffsetMin = 80;
+        int yOffsetMax = 110;
+
+        while(topPlat.getY() > -200){
+            double lowX = Math.max(0, topPlat.getX() - xOffset);
+            double highX = Math.min(this.root.getWidth() - topPlat.getPlatformWidth(), topPlat.getX() + xOffset);
+            double randX = Math.random() * (highX - lowX) + lowX;
+
+            double lowY = topPlat.getY() - yOffsetMin;
+            double highY = topPlat.getY() - yOffsetMax;
+            double randY = Math.random() * (highY - lowY) + lowY;
+
+            Platform newPlat = new Platform(randX,randY);
+            this.platforms.add(newPlat);
+            this.root.getChildren().add(newPlat);
+            topPlat = newPlat;
+
         }
     }
 
@@ -147,7 +180,7 @@ public class Game {
     /**
      * Create the initial quit button in the corner.
      */
-    public void initializeQuitButton(int width, int height) {
+    private void initializeQuitButton(int width, int height) {
         ImageView tempImg = new ImageView(new Image(getClass().getResource("/Images/done.png").toExternalForm()));
         tempImg.setPreserveRatio(true); // make sure there's no infinite scaling
 

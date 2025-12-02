@@ -19,7 +19,6 @@ public class Platform extends ImageView {
         this.type = "normal";
         this.setupImage();
 
-        this.setImage(platImg);
         this.setFitHeight(PLATFORM_HEIGHT);
         this.setFitWidth(PLATFORM_WIDTH);
         this.setX(x);
@@ -39,10 +38,6 @@ public class Platform extends ImageView {
 
     public String getType() {
         return this.type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public Image getPlatformImage() {
@@ -77,5 +72,17 @@ public class Platform extends ImageView {
     }
     public int getPlatformHeight(){
         return this.PLATFORM_HEIGHT;
+    }
+
+    public void breakPlatform(){
+        if(!this.type.equals("breakable"))
+            return;
+
+        this.setImage(null);
+    }
+    public void fixPlatform(){
+        if(!this.type.equals("breakable"))
+            return;
+        this.setupImage();
     }
 }

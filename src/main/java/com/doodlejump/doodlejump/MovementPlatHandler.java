@@ -130,17 +130,16 @@ public class MovementPlatHandler {
                     else
                         velocity = REBOUND_VELOCITY;
                     if (platform.getType().equals("breakable")) {
-                        platformsToRemove.add(platform);
-                        platform.setImage(null);
+                        platform.breakPlatform();
                     }
                 }
             }
         } // end of loop
         // get rid of the platforms.
-        for (int i = 0; i < platformsToRemove.size(); i++) {
+        /*for (int i = 0; i < platformsToRemove.size(); i++) {
             this.game.getRoot().getChildren().remove(platformsToRemove.get(i));
             this.platforms.remove(platformsToRemove.get(i));
-        }
+        }*/
 
     }
 
