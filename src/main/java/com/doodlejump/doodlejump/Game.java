@@ -7,8 +7,7 @@
 //
 //Run the games different classes together to make doodlejump.
 // TODO:
-//  platform overhaul/extra platforms
-//  score
+//  add ramping difficulty, not choosing though thats too much work
 package com.doodlejump.doodlejump;
 
 import javafx.scene.Scene;

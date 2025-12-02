@@ -14,35 +14,39 @@ import java.util.List;
 
 public class MovementPlatHandler {
 
+    // other objects needed for the loop to function
     private Player player;
     private Game game; // needed this to actually end the game.
     private Scene scene;
     private List<Platform> platforms;  // multiple platforms
     private Timeline gLoop;
+    // ----------------------------------------------
 
     private ArrayList<String> input;
-    private double velocity;
+    private double velocity, speedMultiplier;
+    private final double GRAVITY = 100, DURATION = 0.05, REBOUND_VELOCITY = -(GRAVITY * 2); // constants which have been tweaked to feel smooth
     private boolean gameOver;
-    //constants which have been tweaked to feel smooth
-    private final double GRAVITY = 100;
-    private final double DURATION = 0.05;
-    private final double REBOUND_VELOCITY = -(GRAVITY * 2);
 
     /**
      * Instantiates a new Movement plat handler.
      *
      * @param scene     the scene for key usage
      * @param player    the player object
-     * @param platforms the platforms the list of all platforms
+     * @param platforms the list of all platforms
      */
     public MovementPlatHandler(Scene scene, Player player, List<Platform> platforms, Game game) {
+
+        // setting up necessary objects
         this.player = player;
         this.game = game;
         this.scene = scene;
-        this.velocity = 0;
         this.platforms = platforms;
+        //-----------------------------
 
+        this.speedMultiplier = 1; // will add to speed over time
+        this.velocity = 0;
         this.gameOver = false;
+
         input = new ArrayList<>();
 
         // handle key press/release
@@ -68,9 +72,11 @@ public class MovementPlatHandler {
             scrollPlatforms(); // infinite scrolling
         });
 
+        // set up loop forever (indefinitely)
         gLoop = new Timeline(loopKeyFrame);
         gLoop.setCycleCount(Timeline.INDEFINITE);
         gLoop.play();
+        //-----------------------------------
     }
 
     /**
@@ -78,6 +84,12 @@ public class MovementPlatHandler {
      */
     private void updateMovement() {
         double prevY = player.getY();
+
+        // handling moving platforms here since it is for movement in general
+        for (Platform p : platforms)
+            if (p.getType().equals("moving"))
+                handleMovingPlatform(p);
+        //------------------------------
 
         // move left/right
         if (input.contains("LEFT") && !gameOver) {
@@ -89,12 +101,11 @@ public class MovementPlatHandler {
             player.setImage("right");
         }
 
-        // gravity so set how fast you fall down
+        // velocity and player height managed here:
         velocity += GRAVITY * DURATION;
         player.setY(player.getY() + velocity * DURATION);
-
         player.setPreviousY(prevY);
-
+        //-----------------------------------------
     }
 
     /**
@@ -224,11 +235,6 @@ public class MovementPlatHandler {
             for (Platform p : platforms) {
                 p.setY(p.getY() + diff);
 
-                // handling moving platforms
-                if (p.getType().equals("moving")) {
-                    handleMovingPlatform(p, -(this.player.getSpeed()));
-                }
-
                 // if a platform goes to the bottom off the screen then it moves to top with random X
                 if (p.getY() > 700) {
                     p.setY(0);
@@ -245,9 +251,27 @@ public class MovementPlatHandler {
         }
     }// end of scroll method
 
-    private void handleMovingPlatform(Platform p, double speed) {
+    /**
+     * Move moving platform and bounce it when it hits the side of the game
+     *
+     * @param p the platform to move.
+     */
+    private void handleMovingPlatform(Platform p) {
         if (!p.getType().equals("moving"))
             return;
+
+        double speed = p.getHorizontalSpeed();
+        //always move platform left or right
+        p.setX(p.getX() + speed * speedMultiplier);
+
+        // flip the speed for continuous rebounding
+        if (p.getX() > this.scene.getWidth() - p.getFitWidth())
+            speed = -(speed);
+        else if (p.getX() < 0)
+            speed = -(speed);
+
+        p.setHorizontalSpeed(speed);
+        this.speedMultiplier += .00002;
 
     }
 }

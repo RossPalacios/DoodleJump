@@ -6,18 +6,25 @@ import javafx.scene.image.ImageView;
 public class Platform extends ImageView {
 
     // creating constants for different platforms.
-    private final Image normalPlat = new Image(getClass().getResource("/Images/simple-platform.png").toExternalForm());
-    private final Image breakablePlat = new Image(getClass().getResource("/Images/breaking-platform.png").toExternalForm());
-    private final Image bouncyPlat = new Image(getClass().getResource("/Images/bouncy-platform.png").toExternalForm());
-    private final int PLATFORM_HEIGHT = 20;
-    private final int PLATFORM_WIDTH = 100;
+    private final Image normalPlat = new Image(getClass().getResource("/Images/simple-platform.png").toExternalForm()),
+            breakablePlat = new Image(getClass().getResource("/Images/breaking-platform.png").toExternalForm()),
+            bouncyPlat = new Image(getClass().getResource("/Images/bouncy-platform.png").toExternalForm());
 
-    private Image platImg;
+    private final int PLATFORM_HEIGHT = 20, PLATFORM_WIDTH = 100;
+
     private String type;
+    private double horizontalSpeed;
 
+    /**
+     * parameterized constructor with a placement for the platform
+     *
+     * @param x the x coordinate
+     * @param y the y coordinate
+     */
     public Platform(double x, double y) {
         this.type = "normal";
         this.setupImage();
+        this.horizontalSpeed = 0;
 
         this.setFitHeight(PLATFORM_HEIGHT);
         this.setFitWidth(PLATFORM_WIDTH);
@@ -25,33 +32,59 @@ public class Platform extends ImageView {
         this.setY(y);
     }
 
+    /**
+     * parameterized constructor with a type and placement
+     *
+     * @param type the type of platform
+     * @param x    the x coordinate
+     * @param y    the y coordinate
+     */
     public Platform(String type, double x, double y) {
         this.type = type;
 
         this.setupImage();
-
+        this.horizontalSpeed = 0;
         this.setFitHeight(PLATFORM_HEIGHT);
         this.setFitWidth(PLATFORM_WIDTH);
         this.setX(x);
         this.setY(y);
     }
 
+    /**
+     * get the horizontal speed
+     *
+     * @return the horizontal speed
+     */
+    public double getHorizontalSpeed() {
+        return this.horizontalSpeed;
+    }
+
+    /**
+     * set the speed of moving platforms, will not work on other types
+     *
+     * @param horizontalSpeed the speed inputted
+     */
+    public void setHorizontalSpeed(double horizontalSpeed) {
+        if (!this.getType().equals("moving"))
+            return;
+        this.horizontalSpeed = horizontalSpeed;
+    }
+
+    /**
+     * get the type of platform
+     *
+     * @return the type of platform
+     */
     public String getType() {
         return this.type;
     }
 
-    public Image getPlatformImage() {
-        return platImg;
-
-    }
-
-    public void setPlatformImage(Image platImg) {
-        this.platImg = platImg;
-    }
-
+    /**
+     * set up the image using a switch case based on it's inherent type.
+     */
     public void setupImage() {
         switch (this.type) {
-            case "normal", "moving":
+            case "normal":
                 this.setImage(this.normalPlat);
                 break;
             case "breakable":
@@ -60,29 +93,55 @@ public class Platform extends ImageView {
             case "bouncy":
                 this.setImage(this.bouncyPlat);
                 break;
+            case "moving":
+                this.horizontalSpeed = (int) (Math.random() * (8 - 4 + 1)) + 4; // max speed of 8, min of 4
+                this.setImage(this.normalPlat);
+                break;
         }
     }
 
-    public void setupImage(String type){
+    /**
+     * Set up the image based on the type of platform inputted
+     *
+     * @param type the given type
+     */
+    public void setupImage(String type) {
         this.type = type;
         setupImage();
     }
 
-    public int getPlatformWidth(){
+    /**
+     * simply get the width when needed
+     *
+     * @return the width
+     */
+    public int getPlatformWidth() {
         return this.PLATFORM_WIDTH;
     }
-    public int getPlatformHeight(){
+
+    /**
+     * simply get the height when needed
+     *
+     * @return the height
+     */
+    public int getPlatformHeight() {
         return this.PLATFORM_HEIGHT;
     }
 
-    public void breakPlatform(){
-        if(!this.type.equals("breakable"))
+    /**
+     * "break" a platform so it will not collide or be visible
+     */
+    public void breakPlatform() {
+        if (!this.type.equals("breakable"))
             return;
-
         this.setImage(null);
     }
-    public void fixPlatform(){
-        if(!this.type.equals("breakable"))
+
+    /**
+     * re-enable the previously broken platform
+     */
+    public void fixPlatform() {
+        if (!this.type.equals("breakable"))
             return;
         this.setupImage();
     }
