@@ -103,8 +103,10 @@ public class MovementPlatHandler {
     private void checkBorders() {
 
         // wrap horizontally
-        if (player.getX() > this.scene.getWidth() && !gameOver) player.setX(0);
-        if (player.getX() + player.getFitWidth() < 0) player.setX(this.scene.getWidth() - player.getFitWidth());
+        if (player.getX() > this.scene.getWidth() && !gameOver)
+            player.setX(0);
+        if (player.getX() + player.getFitWidth() < 0)
+            player.setX(this.scene.getWidth() - player.getFitWidth());
 
         //if the player hits the bottom, game over
         if (player.getY() + player.getFitHeight() > this.scene.getHeight()) {
@@ -117,8 +119,6 @@ public class MovementPlatHandler {
      * check if the player is hitting a platform and should bounce.
      */
     private void checkPlatformCollision() {
-
-        List<Platform> platformsToRemove = new ArrayList<>(); // going to remove platforms after loop.
 
         for (Platform platform : platforms) {
             // if the player is falling and is above the platform, rebound/bounce
@@ -135,12 +135,6 @@ public class MovementPlatHandler {
                 }
             }
         } // end of loop
-        // get rid of the platforms.
-        /*for (int i = 0; i < platformsToRemove.size(); i++) {
-            this.game.getRoot().getChildren().remove(platformsToRemove.get(i));
-            this.platforms.remove(platformsToRemove.get(i));
-        }*/
-
     }
 
     /**
@@ -230,18 +224,30 @@ public class MovementPlatHandler {
             for (Platform p : platforms) {
                 p.setY(p.getY() + diff);
 
+                // handling moving platforms
+                if (p.getType().equals("moving")) {
+                    handleMovingPlatform(p, -(this.player.getSpeed()));
+                }
+
                 // if a platform goes to the bottom off the screen then it moves to top with random X
                 if (p.getY() > 700) {
                     p.setY(0);
                     p.setX(Math.random() * (400 - p.getFitWidth()));
 
                     this.game.addToScore();
+                    p.fixPlatform();
 
-                    String[] types = {"normal", "bouncy", "breakable","moving"};
-                    String type = types[(int)(Math.random() * types.length)];
+                    String[] types = {"normal", "bouncy", "breakable", "moving", "normal", "normal", "normal", "normal"};
+                    String type = types[(int) (Math.random() * types.length)];
                     p.setupImage(type);
                 }
-            }
+            }// end of for loop
         }
+    }// end of scroll method
+
+    private void handleMovingPlatform(Platform p, double speed) {
+        if (!p.getType().equals("moving"))
+            return;
+
     }
 }

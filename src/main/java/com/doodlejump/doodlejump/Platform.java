@@ -42,6 +42,7 @@ public class Platform extends ImageView {
 
     public Image getPlatformImage() {
         return platImg;
+
     }
 
     public void setPlatformImage(Image platImg) {
