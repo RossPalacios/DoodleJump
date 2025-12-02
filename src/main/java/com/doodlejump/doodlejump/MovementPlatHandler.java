@@ -106,8 +106,7 @@ public class MovementPlatHandler {
         if (player.getX() > this.scene.getWidth() && !gameOver) player.setX(0);
         if (player.getX() + player.getFitWidth() < 0) player.setX(this.scene.getWidth() - player.getFitWidth());
 
-        // bottom boundary, will remove once platforms are 100% implemented since doodle
-        // shouldn't be allowed to go past the bottom.
+        //if the player hits the bottom, game over
         if (player.getY() + player.getFitHeight() > this.scene.getHeight()) {
             gLoop.stop();
             game.endGame();
@@ -118,15 +117,31 @@ public class MovementPlatHandler {
      * check if the player is hitting a platform and should bounce.
      */
     private void checkPlatformCollision() {
+
+        List<Platform> platformsToRemove = new ArrayList<>(); // going to remove platforms after loop.
+
         for (Platform platform : platforms) {
             // if the player is falling and is above the platform, rebound/bounce
             if (velocity > 0 && player.getPreviousY() + player.getFitHeight() <= platform.getY() && !gameOver) {
                 if (isColliding(platform, player)) {
                     player.setY(platform.getY() - player.getFitHeight());
-                    velocity = REBOUND_VELOCITY;
+                    if (platform.getType().equals("bouncy"))
+                        velocity = REBOUND_VELOCITY * 2;
+                    else
+                        velocity = REBOUND_VELOCITY;
+                    if (platform.getType().equals("breakable")) {
+                        platformsToRemove.add(platform);
+                        platform.setImage(null);
+                    }
                 }
             }
+        } // end of loop
+        // get rid of the platforms.
+        for (int i = 0; i < platformsToRemove.size(); i++) {
+            this.game.getRoot().getChildren().remove(platformsToRemove.get(i));
+            this.platforms.remove(platformsToRemove.get(i));
         }
+
     }
 
     /**
@@ -138,6 +153,8 @@ public class MovementPlatHandler {
      */
     private boolean isColliding(ImageView platform, ImageView player) {
 
+        if (platform.getImage() == null)
+            return false;
 
         // create pixel reader to check collision
         PixelReader pixelReaderOne = platform.getImage().getPixelReader();
@@ -218,6 +235,12 @@ public class MovementPlatHandler {
                 if (p.getY() > 700) {
                     p.setY(0);
                     p.setX(Math.random() * (400 - p.getFitWidth()));
+
+                    this.game.addToScore();
+
+                    String[] types = {"normal", "bouncy", "breakable","moving"};
+                    String type = types[(int)(Math.random() * types.length)];
+                    p.setupImage(type);
                 }
             }
         }

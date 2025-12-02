@@ -6,9 +6,11 @@
 //
 //
 //Run the games different classes together to make doodlejump.
+// TODO:
+//  platform overhaul/extra platforms
+//  score
 package com.doodlejump.doodlejump;
 
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;
@@ -25,6 +27,8 @@ public class Game {
     private Player player;
     private ImageView backGround;
     private List<Platform> platforms; // multiple platforms instead of just the test ones
+    private Button quitBtn;
+    private int score;
 
     /**
      * Create the game given a stage
@@ -33,6 +37,7 @@ public class Game {
      */
     public Game(Stage primaryStage) {
         double playerSpeedTemp = 5;
+        this.score = 0;
 
         this.primaryStage = primaryStage;
         this.root = new Pane();
@@ -42,6 +47,16 @@ public class Game {
 
         // create multiple platforms
         this.platforms = new ArrayList<>();
+
+        initializeQuitButton(100, 50);
+    }
+
+    public void addToScore() {
+        this.score++;
+    }
+
+    public Pane getRoot() {
+        return this.root;
     }
 
     /**
@@ -58,35 +73,41 @@ public class Game {
 
         root.getChildren().add(player); // add player
 
-        runPlatforms();
-        // add all platforms
-        for (Platform p : platforms) {
-            root.getChildren().add(p);
-        }
+        initializePlatforms();
+
 
         // create handler for movement, collisions, and scrolling
         MovementPlatHandler handler = new MovementPlatHandler(scene, player, platforms, this);
         handler.update();
 
+        root.getChildren().add(quitBtn); // add the quit button
+        root.requestFocus(); // make sure keys still work
+
     }
 
-    /**
-     * get the platforms created with a loop.
-     */
-    public void runPlatforms() {
-        int numberOfPlatforms = 10;
-        for (int i = 0; i < numberOfPlatforms; i++) {
-            Platform p = new Platform();
-            p.setX(Math.random() * (400 - p.getFitWidth())); // random X for the placement of the platform
-            p.setY(600 - i * 60); // spread platforms vertically
+    private void initializePlatforms() {
+        int numOfPlatforms = 10;
+        double spacing = 700.0 / numOfPlatforms;
+
+        for (int i = 0; i < numOfPlatforms; i++) {
+            double x = Math.random() * (400 - 100); // get random x, using screen and platform width
+            double y = i * spacing;
+
+            Platform p = new Platform(x, y);
+
+            String[] types = {"normal", "bouncy", "breakable","moving"};
+            String type = types[(int)(Math.random() * types.length)];
+            p.setupImage(type);
+
             platforms.add(p);
+            root.getChildren().add(p);
         }
     }
 
     /**
      * delete all platforms
      */
-    private void deletePlatforms(){
+    private void deletePlatforms() {
         for (Platform p : platforms) {
             this.root.getChildren().remove(p);
         }
@@ -96,11 +117,10 @@ public class Game {
      * End the game and make a game over screen with a quit button.
      */
     public void endGame() {
-
         //initializing bottom breaking of screen.
-        ImageView bottomCrease =  new ImageView(new Image(getClass().getResource("/Images/gameoverbottom.png").toExternalForm()));
-        ImageView gameOverTitle = new ImageView( new Image(getClass().getResource("/Images/gameover.png").toExternalForm()));
-        ImageView quit = new ImageView( new Image(getClass().getResource("/Images/done.png").toExternalForm()));
+        ImageView bottomCrease = new ImageView(new Image(getClass().getResource("/Images/gameoverbottom.png").toExternalForm()));
+        ImageView gameOverTitle = new ImageView(new Image(getClass().getResource("/Images/gameover.png").toExternalForm()));
+        ImageView quit = new ImageView(new Image(getClass().getResource("/Images/done.png").toExternalForm()));
         //just manually set the position for the crinkling
         bottomCrease.setFitWidth(450);
         bottomCrease.setFitHeight(200);
@@ -108,22 +128,42 @@ public class Game {
         bottomCrease.setX(-10);
         //------------------------------
 
-        // Initialization of quit button
-        Button quitBtn = new Button();
-        quitBtn.setGraphic(quit);
-        quitBtn.setStyle("-fx-background-color: transparent;");
-        quitBtn.setLayoutX(75);
-        quitBtn.setLayoutY((this.root.getHeight() + quit.getFitHeight()) / 2);
-        quitBtn.setOnAction(e -> {
-            primaryStage.close();
-        });
+        // moving quit button to the center
+        this.quitBtn.setPrefSize(250, 100);
+        this.quitBtn.setMinSize(250, 100);
+        this.quitBtn.setMaxSize(250, 100);
+
+
+        this.quitBtn.setLayoutX(75);
+        this.quitBtn.setLayoutY((this.root.getHeight() + quit.getFitHeight()) / 2);
         //---------------------------------
 
         this.root.getChildren().add(gameOverTitle);
         this.root.getChildren().add(bottomCrease);
-        this.root.getChildren().add(quitBtn);
 
         deletePlatforms();
+    }
+
+    /**
+     * Create the initial quit button in the corner.
+     */
+    public void initializeQuitButton(int width, int height) {
+        ImageView tempImg = new ImageView(new Image(getClass().getResource("/Images/done.png").toExternalForm()));
+        tempImg.setPreserveRatio(true); // make sure there's no infinite scaling
+
+        this.quitBtn = new Button();
+        this.quitBtn.setGraphic(tempImg);
+        this.quitBtn.setStyle("-fx-background-color: transparent;");
+        this.quitBtn.setPrefSize(width, height);
+        this.quitBtn.setMinSize(width, height);
+        this.quitBtn.setMaxSize(width, height);
+
+        tempImg.fitWidthProperty().bind(this.quitBtn.widthProperty()); // bind image to button
+        tempImg.fitHeightProperty().bind(this.quitBtn.heightProperty());
+
+        this.quitBtn.setOnAction(e -> {
+            primaryStage.close();
+        });
     }
 }
 
