@@ -22,13 +22,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
+
+    // necessary objects for the game
     private Stage primaryStage;
     private Pane root;
     private Player player;
     private ImageView backGround;
-    private List<Platform> platforms; // multiple platforms instead of just the test ones
     private Button quitBtn;
-    private Platform firstPlat;
+
+    private List<Platform> platforms; // multiple platforms instead of just the test ones
+    private Platform firstPlat; // initial platform
+
+    // score related:
     private Label scoreLbl;
     private int score;
 
@@ -38,10 +43,10 @@ public class Game {
      * @param primaryStage the primary stage
      */
     public Game(Stage primaryStage) {
-        double playerSpeedTemp = 5;
+
         this.score = 0;
 
-        this.player = new Player(playerSpeedTemp);
+        this.player = new Player();
 
         // stage and background
         this.primaryStage = primaryStage;
@@ -63,7 +68,7 @@ public class Game {
         // create and place score
         this.scoreLbl = new Label();
         this.scoreLbl.setText("Score: 0");
-        this.scoreLbl.setLayoutX(350);
+        this.scoreLbl.setLayoutX(335);
     }
 
     public void addToScore() {
@@ -117,7 +122,7 @@ public class Game {
         bottomCrease.setX(-10);
         //------------------------------
 
-        // moving quit button to the center, once again manually
+        // moving quit button to the center, once again manually, along with score
         this.quitBtn.setPrefSize(250, 100);
         this.quitBtn.setMinSize(250, 100);
         this.quitBtn.setMaxSize(250, 100);
@@ -125,12 +130,16 @@ public class Game {
 
         this.quitBtn.setLayoutX(75);
         this.quitBtn.setLayoutY((this.root.getHeight() + quit.getFitHeight()) / 2); // just centers the y
+
+        this.scoreLbl.setLayoutX(this.quitBtn.getLayoutX() * 2.275); // the multiplier was just manually tested to get it centered
+        this.scoreLbl.setLayoutY(this.quitBtn.getLayoutY() - this.scoreLbl.getHeight());
         //---------------------------------
 
         this.root.getChildren().add(gameOverTitle);
         this.root.getChildren().add(bottomCrease);
 
         deletePlatforms();
+
     }
 
     /**
@@ -176,11 +185,13 @@ public class Game {
         ImageView tempImg = new ImageView(new Image(getClass().getResource("/Images/done.png").toExternalForm()));
         tempImg.setPreserveRatio(true); // make sure there's no infinite scaling
 
+        // lot of initialization things so I gave this its own method
         this.quitBtn = new Button();
         this.quitBtn.setGraphic(tempImg);
         this.quitBtn.setStyle("-fx-background-color: transparent;");
+
         this.quitBtn.setPrefSize(width, height);
-        this.quitBtn.setMinSize(width, height);
+        this.quitBtn.setMinSize(width, height); // min and max needed, had to force it pretty much
         this.quitBtn.setMaxSize(width, height);
 
         tempImg.fitWidthProperty().bind(this.quitBtn.widthProperty()); // bind image to button

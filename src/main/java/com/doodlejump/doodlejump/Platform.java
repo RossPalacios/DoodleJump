@@ -13,7 +13,7 @@ public class Platform extends ImageView {
     private final int PLATFORM_HEIGHT = 20, PLATFORM_WIDTH = 100;
 
     private String type;
-    private double horizontalSpeed;
+    private double horizontalSpeed, speedMultiplier; // both used for moving platforms
 
     /**
      * parameterized constructor with a placement for the platform
@@ -25,6 +25,7 @@ public class Platform extends ImageView {
         this.type = "normal";
         this.setupImage();
         this.horizontalSpeed = 0;
+        this.speedMultiplier = 1;
 
         this.setFitHeight(PLATFORM_HEIGHT);
         this.setFitWidth(PLATFORM_WIDTH);
@@ -44,6 +45,7 @@ public class Platform extends ImageView {
 
         this.setupImage();
         this.horizontalSpeed = 0;
+        this.speedMultiplier = 1;
         this.setFitHeight(PLATFORM_HEIGHT);
         this.setFitWidth(PLATFORM_WIDTH);
         this.setX(x);
@@ -68,6 +70,24 @@ public class Platform extends ImageView {
         if (!this.getType().equals("moving"))
             return;
         this.horizontalSpeed = horizontalSpeed;
+    }
+
+    /**
+     * get the speed multiplier of moving platforms
+     * @return the multiplier
+     */
+    public double getSpeedMultiplier() {
+        return this.speedMultiplier;
+    }
+
+    /**
+     * set the speed multiplier of moving platforms.
+     * @param speedMultiplier the multiplier
+     */
+    public void setSpeedMultiplier(double speedMultiplier) {
+        if (!this.getType().equals("moving"))
+            return;
+        this.speedMultiplier = speedMultiplier;
     }
 
     /**

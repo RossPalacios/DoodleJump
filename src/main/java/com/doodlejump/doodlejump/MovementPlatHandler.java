@@ -23,7 +23,8 @@ public class MovementPlatHandler {
     // ----------------------------------------------
 
     private ArrayList<String> input;
-    private double velocity, speedMultiplier;
+    private double velocity, difficultyScale;
+    private long startTime;
     private final double GRAVITY = 100, DURATION = 0.05, REBOUND_VELOCITY = -(GRAVITY * 2); // constants which have been tweaked to feel smooth
     private boolean gameOver;
 
@@ -43,7 +44,8 @@ public class MovementPlatHandler {
         this.platforms = platforms;
         //-----------------------------
 
-        this.speedMultiplier = 1; // will add to speed over time
+        this.startTime = System.currentTimeMillis();
+        this.difficultyScale = 0;
         this.velocity = 0;
         this.gameOver = false;
 
@@ -84,6 +86,12 @@ public class MovementPlatHandler {
      */
     private void updateMovement() {
         double prevY = player.getY();
+
+        // scaling difficulty over time
+        long currentTime = System.currentTimeMillis();
+        difficultyScale = (currentTime - this.startTime) / 1000.0; // this/1000 is the seconds per difficulty ramp
+        difficultyScale = Math.min(difficultyScale, 10); // this bounds the difficulty
+        //-----------------------------
 
         // handling moving platforms here since it is for movement in general
         for (Platform p : platforms)
@@ -229,6 +237,7 @@ public class MovementPlatHandler {
         double threshold = 300; // Y coordinate above which player triggers scrolling
         if (player.getY() < threshold) {
             double diff = threshold - player.getY();
+            diff *= (1 + difficultyScale * .02); // scale the scroll speed
             player.setY(threshold);
 
             // move all platforms down
@@ -243,13 +252,49 @@ public class MovementPlatHandler {
                     this.game.addToScore();
                     p.fixPlatform();
 
-                    String[] types = {"normal", "bouncy", "breakable", "moving", "normal", "normal", "normal", "normal"};
-                    String type = types[(int) (Math.random() * types.length)];
+                    String type = pickPlatform();
                     p.setupImage(type);
                 }
             }// end of for loop
         }
     }// end of scroll method
+
+    /**
+     * helper method to pick a random platform and scale it with the difficulty.
+     * @return
+     */
+    private String pickPlatform() {
+        double random = Math.random();
+
+        // base chances at difficulty scale of zero
+        double movingPlatProb = .05; // 5%
+        double breakingPlatProb = .10; // 10%
+        double bouncyPlatProb = .10; // 10%, will get lower for difficulty
+
+        // increasing chance with difficulty, although slowly
+        movingPlatProb += difficultyScale * .02; // increases chance by up to 2 percent each time
+        breakingPlatProb += difficultyScale * .025; // want these to appear more
+        bouncyPlatProb -= difficultyScale * .0075; // will decrease very slowly
+
+
+        // add in a cap for the probability
+        movingPlatProb = Math.min(movingPlatProb, .20); // caps out at 30%
+        breakingPlatProb = Math.min(breakingPlatProb, .75); // caps out at 35%
+        bouncyPlatProb = Math.max(bouncyPlatProb, .04); // caps at 4 percent chance
+
+        if(random < movingPlatProb) // based on moving probability
+            return "moving";
+        random -= movingPlatProb; // take this out of our probability range
+
+        if(random < breakingPlatProb) // breaking probability
+            return "breakable";
+        random -= breakingPlatProb;
+
+        if(random < bouncyPlatProb) // bouncy probability
+            return "bouncy";
+
+        return "normal"; // anything else is a regular platform, no need for removing probabilities either.
+    }
 
     /**
      * Move moving platform and bounce it when it hits the side of the game
@@ -260,7 +305,10 @@ public class MovementPlatHandler {
         if (!p.getType().equals("moving"))
             return;
 
+        // created speed class variables so individual platforms could act differently
         double speed = p.getHorizontalSpeed();
+        double speedMultiplier = p.getSpeedMultiplier();
+
         //always move platform left or right
         p.setX(p.getX() + speed * speedMultiplier);
 
@@ -271,7 +319,9 @@ public class MovementPlatHandler {
             speed = -(speed);
 
         p.setHorizontalSpeed(speed);
-        this.speedMultiplier += .00002;
+        speedMultiplier += .00002 * (1 + difficultyScale * .02); // similar scaling as the scrolling.
+
+        p.setSpeedMultiplier(speedMultiplier);
 
     }
 }

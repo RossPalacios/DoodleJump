@@ -9,12 +9,12 @@ public class Player extends ImageView {
     private double speed, previousY;
 
     /**
-     * the parameterized constructor for the player with a player speed
-     * @param speed
+     * the default constructor for the player
      */
-    public Player(double speed) {
+    public Player() {
         int PLAYER_WIDTH_HEIGHT = 100;
-        this.speed = speed;
+        int PLAYER_SPEED = 5; // the manually found speed, I never needed to change it so it's not changeable outside of player for now
+        this.speed = PLAYER_SPEED;
 
         Image doodleGuy = new Image(getClass().getResource("/Images/leftDood.png").toExternalForm());
         this.setImage(doodleGuy);
