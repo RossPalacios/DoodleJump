@@ -43,7 +43,6 @@ public class Game {
 
     /**
      * Create the game given a stage
-     *
      * @param primaryStage the primary stage
      */
     public Game(Stage primaryStage) {
@@ -74,25 +73,11 @@ public class Game {
         // create and place score
         this.scoreLbl = new Label();
         this.scoreLbl.setText("Score: 0");
-        this.scoreLbl.setLayoutX(335);
     }
 
     /**
-     * get whether or not the game has been restarted
-     * @return whether or not its restarted
+     * add to the score and display it.
      */
-    public boolean getRestarted() {
-        return this.restarted;
-    }
-
-    /**
-     * set the gamestate back to normal once fully restarted
-     * @param restarted the boolean to set
-     */
-    public void setRestarted(boolean restarted) {
-        this.restarted = restarted;
-    }
-
     public void addToScore() {
         this.score++;
         this.scoreLbl.setText("Score: " + this.score);
@@ -103,6 +88,7 @@ public class Game {
      */
     public void startGame() {
 
+        primaryStage.initStyle(javafx.stage.StageStyle.UNDECORATED); // make window borderless
         primaryStage.setTitle("Doodle Jump");
         primaryStage.setScene(scene);
         primaryStage.show();
@@ -128,45 +114,11 @@ public class Game {
     }
 
     /**
-     * most logic for restarting the game goes here.
-     */
-    private void restartGame() {
-
-        this.restarted = true;
-
-        // re-add platforms
-        generatePlatforms();
-
-        setupExtrasDependantOnGameState();
-
-        // disable the restart button
-        this.restartBtn.setVisible(false);
-        this.restartBtn.setDisable(true);
-
-        //fix the quit button back to its original state
-        this.quitBtn.setPrefSize(100, 50);
-        this.quitBtn.setMinSize(100, 50);
-        this.quitBtn.setMaxSize(100, 50);
-
-        this.quitBtn.setLayoutX(0);
-        this.quitBtn.setLayoutY(0);
-        //----------------------------------------------
-
-        // set score to original state
-        this.scoreLbl.setLayoutX(335);
-        this.scoreLbl.setLayoutY(0);
-        this.scoreLbl.setText("Score: 0");
-        //----------------------------
-
-        // put player where it goes
-        this.player.setX(50);
-        this.player.setY(200);
-    }
-
-    /**
      * End the game and make a game over screen with a quit button.
      */
     public void endGame() {
+
+        this.restarted = false;
 
         ImageView quit = new ImageView(new Image(getClass().getResource("/Images/done.png").toExternalForm()));
 
@@ -200,6 +152,60 @@ public class Game {
 
         destroyPlatforms();
 
+    }
+
+    /**
+     * most logic for restarting the game goes here.
+     */
+    private void restartGame() {
+
+        this.restarted = true;
+
+        setupExtrasDependantOnGameState();
+
+        // disable the restart button
+        this.restartBtn.setVisible(false);
+        this.restartBtn.setDisable(true);
+
+        //fix the quit button back to its original state
+        this.quitBtn.setPrefSize(100, 50);
+        this.quitBtn.setMinSize(100, 50);
+        this.quitBtn.setMaxSize(100, 50);
+
+        this.quitBtn.setLayoutX(300);
+        this.quitBtn.setLayoutY(0);
+        //----------------------------------------------
+
+        // set score to original state
+        this.score = 0;
+        this.scoreLbl.setLayoutX(0);
+        this.scoreLbl.setLayoutY(0);
+        this.scoreLbl.setText("Score: 0");
+        //----------------------------
+
+        // re-create the first platform
+        this.root.getChildren().remove(firstPlat);
+        this.firstPlat = new Platform(50, 400);
+        this.platforms.add(this.firstPlat);
+        this.root.getChildren().add(firstPlat);
+
+
+        // re-add platforms
+        generatePlatforms();
+
+        // simply puts the quit button over the new platforms
+        this.root.getChildren().remove(quitBtn);
+        this.root.getChildren().add(quitBtn);
+
+        // put player where it goes
+        this.player.setX(50);
+        this.player.setY(200);
+
+        root.requestFocus(); // just gets keys working
+
+        // restart the game loop/handler
+        MovementPlatHandler handler = new MovementPlatHandler(scene, player, platforms, this);
+        handler.update();
     }
 
     /**
@@ -263,8 +269,10 @@ public class Game {
      * destroy all platforms
      */
     private void destroyPlatforms() {
-        for (Platform p : platforms)
+        for (Platform p : platforms) {
             this.root.getChildren().remove(p);
+        }
+        platforms.clear();
     }
 
     /**
@@ -288,6 +296,8 @@ public class Game {
 
         tempImg.fitWidthProperty().bind(this.quitBtn.widthProperty()); // bind image to button
         tempImg.fitHeightProperty().bind(this.quitBtn.heightProperty());
+
+        this.quitBtn.setLayoutX(300);
 
         this.quitBtn.setOnAction(e -> {
             primaryStage.close();

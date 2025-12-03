@@ -1,7 +1,10 @@
 package com.doodlejump.doodlejump;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.util.Duration;
 
 public class Platform extends ImageView {
 
@@ -48,6 +51,7 @@ public class Platform extends ImageView {
         this.speedMultiplier = 1;
         this.setFitHeight(PLATFORM_HEIGHT);
         this.setFitWidth(PLATFORM_WIDTH);
+        this.setPreserveRatio(false);
         this.setX(x);
         this.setY(y);
     }
@@ -74,6 +78,7 @@ public class Platform extends ImageView {
 
     /**
      * get the speed multiplier of moving platforms
+     *
      * @return the multiplier
      */
     public double getSpeedMultiplier() {
@@ -82,6 +87,7 @@ public class Platform extends ImageView {
 
     /**
      * set the speed multiplier of moving platforms.
+     *
      * @param speedMultiplier the multiplier
      */
     public void setSpeedMultiplier(double speedMultiplier) {
@@ -154,7 +160,34 @@ public class Platform extends ImageView {
     public void breakPlatform() {
         if (!this.type.equals("breakable"))
             return;
-        this.setImage(null);
+
+        Image breakablePlatOne = new Image(getClass().getResource("/Images/broken1.png").toExternalForm());
+        Image breakablePlatTwo = new Image(getClass().getResource("/Images/broken2.png").toExternalForm());
+        Image breakablePlatThree = new Image(getClass().getResource("/Images/broken3.png").toExternalForm());
+
+        Image[] images = {breakablePlatOne, breakablePlatOne, breakablePlatOne, breakablePlatTwo, breakablePlatTwo, breakablePlatTwo,
+                breakablePlatThree, breakablePlatThree, breakablePlatThree};
+
+        Timeline timeline = new Timeline();
+        int totalFrames = images.length;
+        double secondsPerFrame = .05;
+
+        // loop through images to animate them frame by frame
+        for (int i = 0; i < totalFrames; i++) {
+            Image currentImg = images[i];
+            KeyFrame key = new KeyFrame(Duration.seconds(i * secondsPerFrame), // tell when each frame happens ( 0, .05, and .1 seconds)
+                    e -> {
+                        this.setImage(currentImg);
+                        this.setFitHeight(PLATFORM_HEIGHT);
+                        this.setFitWidth(PLATFORM_WIDTH);
+                    });
+            timeline.getKeyFrames().add(key);
+        }
+        // disable image so collision functions normally still
+        timeline.setOnFinished(e -> {
+            this.setImage(null);
+        });
+        timeline.play();
     }
 
     /**
@@ -163,6 +196,7 @@ public class Platform extends ImageView {
     public void fixPlatform() {
         if (!this.type.equals("breakable"))
             return;
+        this.type = "breakable";
         this.setupImage();
     }
 }

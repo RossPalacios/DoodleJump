@@ -26,7 +26,6 @@ public class MovementPlatHandler {
     private double velocity, difficultyScale;
     private long startTime;
     private final double GRAVITY = 100, DURATION = 0.05, REBOUND_VELOCITY = -(GRAVITY * 2); // constants which have been tweaked to feel smooth
-    private boolean gameOver;
 
     /**
      * Instantiates a new Movement plat handler.
@@ -47,14 +46,13 @@ public class MovementPlatHandler {
         this.startTime = System.currentTimeMillis();
         this.difficultyScale = 0;
         this.velocity = 0;
-        this.gameOver = false;
 
         input = new ArrayList<>();
 
         // handle key press/release
         scene.setOnKeyPressed(e -> {
             String code = e.getCode().toString();
-            if (!input.contains(code) && !gameOver) input.add(code);
+            if (!input.contains(code)) input.add(code);
         });
 
         scene.setOnKeyReleased(e -> {
@@ -100,11 +98,11 @@ public class MovementPlatHandler {
         //------------------------------
 
         // move left/right
-        if (input.contains("LEFT") && !gameOver) {
+        if (input.contains("LEFT")) {
             player.setX(player.getX() - player.getSpeed());
             player.setImage("left");
         }
-        if (input.contains("RIGHT") && !gameOver) {
+        if (input.contains("RIGHT")) {
             player.setX(player.getX() + player.getSpeed());
             player.setImage("right");
         }
@@ -122,7 +120,7 @@ public class MovementPlatHandler {
     private void checkBorders() {
 
         // wrap horizontally
-        if (player.getX() > this.scene.getWidth() && !gameOver)
+        if (player.getX() > this.scene.getWidth())
             player.setX(0);
         if (player.getX() + player.getFitWidth() < 0)
             player.setX(this.scene.getWidth() - player.getFitWidth());
@@ -141,7 +139,7 @@ public class MovementPlatHandler {
 
         for (Platform platform : platforms) {
             // if the player is falling and is above the platform, rebound/bounce
-            if (velocity > 0 && player.getPreviousY() + player.getFitHeight() <= platform.getY() && !gameOver) {
+            if (velocity > 0 && player.getPreviousY() + player.getFitHeight() <= platform.getY()) {
                 if (isColliding(platform, player)) {
                     player.setY(platform.getY() - player.getFitHeight());
                     if (platform.getType().equals("bouncy"))
@@ -261,6 +259,7 @@ public class MovementPlatHandler {
 
     /**
      * helper method to pick a random platform and scale it with the difficulty.
+     *
      * @return
      */
     private String pickPlatform() {
@@ -282,15 +281,15 @@ public class MovementPlatHandler {
         breakingPlatProb = Math.min(breakingPlatProb, .35); // caps out at 35%
         bouncyPlatProb = Math.max(bouncyPlatProb, .05); // caps at 4 percent chance
 
-        if(random < movingPlatProb) // based on moving probability
+        if (random < movingPlatProb) // based on moving probability
             return "moving";
         random -= movingPlatProb; // take this out of our probability range
 
-        if(random < breakingPlatProb) // breaking probability
+        if (random < breakingPlatProb) // breaking probability
             return "breakable";
         random -= breakingPlatProb;
 
-        if(random < bouncyPlatProb) // bouncy probability
+        if (random < bouncyPlatProb) // bouncy probability
             return "bouncy";
 
         return "normal"; // anything else is a regular platform, at peak difficulty normal platforms spawn 15% of the time
@@ -319,7 +318,7 @@ public class MovementPlatHandler {
             speed = -(speed);
 
         p.setHorizontalSpeed(speed);
-        speedMultiplier += .00002 * (1 + difficultyScale * .02); // similar scaling as the scrolling.
+        speedMultiplier += .001 * (1 + difficultyScale * .02); // similar scaling as the scrolling.
 
         p.setSpeedMultiplier(speedMultiplier);
 
