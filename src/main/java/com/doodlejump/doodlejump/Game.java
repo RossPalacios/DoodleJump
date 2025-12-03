@@ -28,7 +28,7 @@ public class Game {
     private Scene scene;
     private Pane root;
     private Player player;
-    private ImageView backGround;
+    private ImageView backGround, bottomCrease, gameOverTitle;
     private Button quitBtn, restartBtn;
 
     private List<Platform> platforms; // multiple platforms instead of just the test ones
@@ -135,7 +135,7 @@ public class Game {
         this.restarted = true;
 
         // re-add platforms
-        enablePlatforms();
+        generatePlatforms();
 
         setupExtrasDependantOnGameState();
 
@@ -157,14 +157,16 @@ public class Game {
         this.scoreLbl.setLayoutY(0);
         this.scoreLbl.setText("Score: 0");
         //----------------------------
+
+        // put player where it goes
+        this.player.setX(50);
+        this.player.setY(200);
     }
 
     /**
      * End the game and make a game over screen with a quit button.
      */
     public void endGame() {
-
-        setupExtrasDependantOnGameState();
 
         ImageView quit = new ImageView(new Image(getClass().getResource("/Images/done.png").toExternalForm()));
 
@@ -194,16 +196,22 @@ public class Game {
 
         this.root.getChildren().add(restartBtn);
 
-        disablePlatforms();
+        setupExtrasDependantOnGameState();
+
+        destroyPlatforms();
 
     }
 
+    /**
+     * set up extras (game over extras like the "you lose" and crinkling at the bottom)
+     */
     private void setupExtrasDependantOnGameState(){
-        //initializing bottom breaking of screen.
-        ImageView bottomCrease = new ImageView(new Image(getClass().getResource("/Images/gameoverbottom.png").toExternalForm()));
-        ImageView gameOverTitle = new ImageView(new Image(getClass().getResource("/Images/gameover.png").toExternalForm()));
 
         if(!this.restarted) { // changed logic for restarts.
+
+            //initializing bottom breaking of screen.
+            bottomCrease = new ImageView(new Image(getClass().getResource("/Images/gameoverbottom.png").toExternalForm()));
+            gameOverTitle = new ImageView(new Image(getClass().getResource("/Images/gameover.png").toExternalForm()));
 
             bottomCrease.setVisible(true);
             gameOverTitle.setVisible(true);
@@ -252,19 +260,11 @@ public class Game {
     }
 
     /**
-     * disable all platforms
+     * destroy all platforms
      */
-    private void disablePlatforms() {
+    private void destroyPlatforms() {
         for (Platform p : platforms)
-            p.setVisible(false);
-    }
-
-    /**
-     * re-enable all platforms
-     */
-    private void enablePlatforms() {
-        for (Platform p : platforms)
-            p.setVisible(true);
+            this.root.getChildren().remove(p);
     }
 
     /**
