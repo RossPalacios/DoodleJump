@@ -51,6 +51,7 @@ public class Game {
         this.score = 0;
 
         this.player = new Player();
+        this.restarted = false;
 
         // stage and background
         this.primaryStage = primaryStage;
@@ -126,25 +127,36 @@ public class Game {
 
     }
 
+    /**
+     * most logic for restarting the game goes here.
+     */
     private void restartGame() {
+
+        this.restarted = true;
 
         // re-add platforms
         enablePlatforms();
+
+        setupExtrasDependantOnGameState();
 
         // disable the restart button
         this.restartBtn.setVisible(false);
         this.restartBtn.setDisable(true);
 
         //fix the quit button back to its original state
-
         this.quitBtn.setPrefSize(100, 50);
         this.quitBtn.setMinSize(100, 50);
         this.quitBtn.setMaxSize(100, 50);
 
         this.quitBtn.setLayoutX(0);
         this.quitBtn.setLayoutY(0);
-
         //----------------------------------------------
+
+        // set score to original state
+        this.scoreLbl.setLayoutX(335);
+        this.scoreLbl.setLayoutY(0);
+        this.scoreLbl.setText("Score: 0");
+        //----------------------------
     }
 
     /**
@@ -152,7 +164,7 @@ public class Game {
      */
     public void endGame() {
 
-        setUpEndExtras();
+        setupExtrasDependantOnGameState();
 
         ImageView quit = new ImageView(new Image(getClass().getResource("/Images/done.png").toExternalForm()));
 
