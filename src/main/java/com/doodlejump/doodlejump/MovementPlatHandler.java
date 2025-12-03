@@ -306,7 +306,7 @@ public class MovementPlatHandler {
 
         // created speed class variables so individual platforms could act differently
         double speed = p.getHorizontalSpeed();
-        double speedMultiplier = p.getSpeedMultiplier();
+        double speedMultiplier = Math.min(p.getSpeedMultiplier(),3); // had to cap out the multiplier
 
         //always move platform left or right
         p.setX(p.getX() + speed * speedMultiplier);
@@ -318,7 +318,7 @@ public class MovementPlatHandler {
             speed = -(speed);
 
         p.setHorizontalSpeed(speed);
-        speedMultiplier += .001 * (1 + difficultyScale * .02); // similar scaling as the scrolling.
+        speedMultiplier += .0015 * (1 + difficultyScale * .02); // similar scaling as the scrolling.
 
         p.setSpeedMultiplier(speedMultiplier);
 
