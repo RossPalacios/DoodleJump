@@ -89,7 +89,7 @@ public class MovementPlatHandler {
 
         // scaling difficulty over time
         long currentTime = System.currentTimeMillis();
-        difficultyScale = (currentTime - this.startTime) / 1000.0; // this/1000 is the seconds per difficulty ramp
+        difficultyScale = (currentTime - this.startTime) / 5000.0; // this/1000 is the seconds per difficulty ramp
         difficultyScale = Math.min(difficultyScale, 10); // this bounds the difficulty
         //-----------------------------
 
@@ -237,7 +237,7 @@ public class MovementPlatHandler {
         double threshold = 300; // Y coordinate above which player triggers scrolling
         if (player.getY() < threshold) {
             double diff = threshold - player.getY();
-            diff *= (1 + difficultyScale * .02); // scale the scroll speed
+            diff *= (1 + difficultyScale * .05); // scale the scroll speed
             player.setY(threshold);
 
             // move all platforms down
@@ -278,9 +278,9 @@ public class MovementPlatHandler {
 
 
         // add in a cap for the probability
-        movingPlatProb = Math.min(movingPlatProb, .20); // caps out at 30%
-        breakingPlatProb = Math.min(breakingPlatProb, .75); // caps out at 35%
-        bouncyPlatProb = Math.max(bouncyPlatProb, .04); // caps at 4 percent chance
+        movingPlatProb = Math.min(movingPlatProb, .45); // caps out at 45%
+        breakingPlatProb = Math.min(breakingPlatProb, .35); // caps out at 35%
+        bouncyPlatProb = Math.max(bouncyPlatProb, .05); // caps at 4 percent chance
 
         if(random < movingPlatProb) // based on moving probability
             return "moving";
@@ -293,7 +293,7 @@ public class MovementPlatHandler {
         if(random < bouncyPlatProb) // bouncy probability
             return "bouncy";
 
-        return "normal"; // anything else is a regular platform, no need for removing probabilities either.
+        return "normal"; // anything else is a regular platform, at peak difficulty normal platforms spawn 15% of the time
     }
 
     /**
