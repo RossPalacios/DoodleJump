@@ -120,7 +120,7 @@ public class Platform extends ImageView {
                 this.setImage(this.bouncyPlat);
                 break;
             case "moving":
-                this.horizontalSpeed = (int) (Math.random() * (7 - 5 + 1)) + 4; // max speed of 7, min of 5
+                this.horizontalSpeed = (int) (Math.random() * (7 - 5 + 1)) + 5; // max speed of 7, min of 5
                 this.setImage(this.normalPlat);
                 break;
         }
