@@ -235,7 +235,7 @@ public class MovementPlatHandler {
         double threshold = 300; // Y coordinate above which player triggers scrolling
         if (player.getY() < threshold) {
             double diff = threshold - player.getY();
-            diff *= (1 + difficultyScale * .05); // scale the scroll speed
+            diff *= (1 + difficultyScale * .08); // scale the scroll speed
             player.setY(threshold);
 
             // move all platforms down
@@ -306,7 +306,7 @@ public class MovementPlatHandler {
 
         // created speed class variables so individual platforms could act differently
         double speed = p.getHorizontalSpeed();
-        double speedMultiplier = Math.min(p.getSpeedMultiplier(),3); // had to cap out the multiplier
+        double speedMultiplier = Math.min(p.getSpeedMultiplier(),2.15); // had to cap out the multiplier at around 2 times
 
         //always move platform left or right
         p.setX(p.getX() + speed * speedMultiplier);
