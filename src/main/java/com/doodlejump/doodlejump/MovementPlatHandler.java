@@ -306,7 +306,7 @@ public class MovementPlatHandler {
 
         // created speed class variables so individual platforms could act differently
         double speed = p.getHorizontalSpeed();
-        double speedMultiplier = Math.min(p.getSpeedMultiplier(),2.15); // had to cap out the multiplier at around 2 times
+        double speedMultiplier = Math.min(p.getSpeedMultiplier(),2); // had to cap out the multiplier at around 2 times
 
         //always move platform left or right
         p.setX(p.getX() + speed * speedMultiplier);
